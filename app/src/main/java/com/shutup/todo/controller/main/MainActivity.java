@@ -1,10 +1,12 @@
 package com.shutup.todo.controller.main;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Display;
@@ -15,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.shutup.todo.R;
+import com.shutup.todo.controller.base.BaseActivity;
 import com.shutup.todo.model.MenuItem;
 
 import java.util.ArrayList;
@@ -22,8 +25,9 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     @InjectView(R.id.toolbar_title)
     TextView mToolbarTitle;
@@ -39,9 +43,14 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout mDrawerView;
     @InjectView(R.id.drawer)
     DrawerLayout mDrawer;
+    @InjectView(R.id.addTodoFAB)
+    FloatingActionButton mAddTodoFAB;
+    @InjectView(R.id.main_content)
+    CoordinatorLayout mMainContent;
     private String TAG = this.getClass().getSimpleName();
     private List<MenuItem> mMenuItems;
     private DrawerMenuAdapter mDrawerMenuAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
         mMenuItems.add(new MenuItem("全部"));
         mMenuItems.add(new MenuItem("已完成"));
         mMenuItems.add(new MenuItem("未完成"));
-        mDrawerMenuAdapter = new DrawerMenuAdapter(this,mMenuItems);
+        mDrawerMenuAdapter = new DrawerMenuAdapter(this, mMenuItems);
         mDrawerMenuList.setAdapter(mDrawerMenuAdapter);
         mDrawerMenuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -105,5 +114,11 @@ public class MainActivity extends AppCompatActivity {
 //                }
             }
         });
+    }
+
+    @OnClick(R.id.addTodoFAB)
+    public void onClick() {
+        Intent intent = new Intent(this, AddTodoActivity.class);
+        startActivity(intent);
     }
 }

@@ -6,12 +6,10 @@
               android:layout_height="match_parent"
     >
     <TextView
-        android:layout_marginLeft="@dimen/drawer_menu_title_margin"
-        android:layout_marginStart="@dimen/drawer_menu_title_margin"
+        android:gravity="center"
         android:layout_marginTop="@dimen/drawer_menu_title_margin"
         android:layout_marginBottom="@dimen/drawer_menu_title_margin"
         tools:text="Just For Test"
-        android:textColor="@android:color/black"
         android:textSize="@dimen/drawer_menu_title_size"
         android:id="@+id/menu_title"
         android:layout_width="match_parent"

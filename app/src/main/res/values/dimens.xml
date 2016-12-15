@@ -4,7 +4,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="drawer_width">320dp</dimen>
     <dimen name="menu_list_divider_height">1dp</dimen>
-    <dimen name="toolbar_padding_top">25dp</dimen>
+    <dimen name="toolbar_padding_top">0dp</dimen>
     <dimen name="drawer_menu_title_size">25sp</dimen>
     <dimen name="drawer_menu_title_margin">10dp</dimen>
 </resources>
