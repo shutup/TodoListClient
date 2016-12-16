@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Todo</string>
+    <string name="loginBtnTitle">Login</string>
+    <string name="registerBtnTitle">Register</string>
+    <string name="drawer_close">drawer_close</string>
+    <string name="drawer_open">drawer_open</string>
+    <string name="loginActivityTitle">Login</string>
+    <string name="passwordHintStr">Password</string>
+    <string name="registerActivityTitle">Register</string>
+    <string name="userNameHintStr">Phone</string>
+    <string name="passwordConfirmHintStr">Password Confirm</string>
+</resources>

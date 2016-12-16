@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.shutup.todo.R;
-import com.shutup.todo.model.MenuItem;
+import com.shutup.todo.model.normal_use.MenuItem;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.shutup.todo.model;
+package com.shutup.todo.model.normal_use;
 
 /**
  * Created by shutup on 2016/12/14.
