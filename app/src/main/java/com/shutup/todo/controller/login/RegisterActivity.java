@@ -15,8 +15,9 @@ import android.widget.Toast;
 import com.shutup.todo.BuildConfig;
 import com.shutup.todo.R;
 import com.shutup.todo.common.Constants;
+import com.shutup.todo.common.RetrofitSingleton;
+import com.shutup.todo.common.TodoListApi;
 import com.shutup.todo.controller.base.BaseActivity;
-import com.shutup.todo.controller.main.TodoListApi;
 import com.shutup.todo.model.request.RegisterUserRequest;
 import com.shutup.todo.model.response.RestInfo;
 
@@ -26,8 +27,6 @@ import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RegisterActivity extends BaseActivity implements Constants {
 
@@ -58,6 +57,12 @@ public class RegisterActivity extends BaseActivity implements Constants {
         ButterKnife.inject(this);
         initToolBar();
         initInputLayout();
+        initApiInstance();
+    }
+
+    private void initApiInstance() {
+
+        mTodoListApi = RetrofitSingleton.getApiInstance(TodoListApi.class);
     }
 
     @OnClick(R.id.registerBtn)
@@ -66,11 +71,7 @@ public class RegisterActivity extends BaseActivity implements Constants {
             if (checkPasswordSame()) {
                 String username = mUserPhone.getEditableText().toString().trim();
                 String password = mPassword.getEditableText().toString().trim();
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(BASE_URL)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
-                mTodoListApi = retrofit.create(TodoListApi.class);
+
                 Call<RestInfo> call = mTodoListApi.registerUser(new RegisterUserRequest(username, password));
                 call.enqueue(new Callback<RestInfo>() {
                     @Override

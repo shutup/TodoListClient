@@ -11,17 +11,33 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.shutup.todo.BuildConfig;
 import com.shutup.todo.R;
+import com.shutup.todo.common.RetrofitSingleton;
+import com.shutup.todo.common.TodoListApi;
 import com.shutup.todo.controller.base.BaseActivity;
 import com.shutup.todo.controller.main.MainActivity;
+import com.shutup.todo.model.request.LoginUserRequest;
+import com.shutup.todo.model.response.LoginUserResponse;
+import com.shutup.todo.model.response.RestInfo;
+
+import java.io.IOException;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import io.realm.Realm;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends BaseActivity {
+
+    private TodoListApi mTodoListApi;
 
     @InjectView(R.id.toolbar_title)
     TextView mToolbarTitle;
@@ -48,6 +64,11 @@ public class LoginActivity extends BaseActivity {
 
         initToolBar();
         initInputLayout();
+        initApiInstance();
+    }
+
+    private void initApiInstance() {
+        mTodoListApi = RetrofitSingleton.getApiInstance(TodoListApi.class);
     }
 
     private void initInputLayout() {
@@ -122,9 +143,46 @@ public class LoginActivity extends BaseActivity {
         switch (view.getId()) {
             case R.id.loginBtn:
                 if (checkUserPhone()&& checkPassword()) {
-                    intent = new Intent(this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
+                    Call<ResponseBody> call= mTodoListApi.loginUser(new LoginUserRequest(mUserPhone.getEditableText().toString(),mPassword.getEditableText().toString()));
+                    call.enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            Gson gson = new Gson();
+                            LoginUserResponse loginUserResponse =null;
+                            if (response.isSuccessful()) {
+                                try {
+                                    loginUserResponse = gson.fromJson(response.body().string(),LoginUserResponse.class);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                Realm realm = Realm.getDefaultInstance();
+                                realm.beginTransaction();
+                                realm.copyToRealm(loginUserResponse);
+                                realm.commitTransaction();
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }else {
+                                RestInfo info = null;
+                                try {
+                                    info = gson.fromJson(response.errorBody().string(),RestInfo.class);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                if (info!= null) {
+                                    Toast.makeText(LoginActivity.this, info.getMsg(), Toast.LENGTH_SHORT).show();
+                                }else {
+                                    Toast.makeText(LoginActivity.this, "请求异常", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            if (BuildConfig.DEBUG) Log.d("LoginActivity", "t:" + t);
+                        }
+                    });
+
                 }
                 break;
             case R.id.registerText:
