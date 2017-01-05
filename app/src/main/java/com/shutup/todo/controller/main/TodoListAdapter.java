@@ -18,6 +18,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import io.realm.RealmList;
 
 /**
  * Created by shutup on 2017/1/5.
@@ -25,10 +26,10 @@ import butterknife.InjectView;
 
 public class TodoListAdapter extends RecyclerView.Adapter<MyViewHolder> implements Constants{
     private Context mContext;
-    private List<Todo> mTodos;
+    private RealmList<Todo> mTodos;
     private int type;
 
-    public TodoListAdapter(Context context, List<Todo> todos) {
+    public TodoListAdapter(Context context, RealmList<Todo> todos) {
         mContext = context;
         mTodos = todos;
     }
@@ -79,11 +80,11 @@ public class TodoListAdapter extends RecyclerView.Adapter<MyViewHolder> implemen
         this.type = type;
     }
 
-    public List<Todo> getTodos() {
+    public RealmList<Todo> getTodos() {
         return mTodos;
     }
 
-    public void setTodos(List<Todo> todos) {
+    public void setTodos(RealmList<Todo> todos) {
         mTodos = todos;
     }
 }

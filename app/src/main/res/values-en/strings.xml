@@ -10,4 +10,10 @@
     <string name="registerActivityTitle">Register</string>
     <string name="userNameHintStr">Phone</string>
     <string name="passwordConfirmHintStr">Password Confirm</string>
+    <string name="btn_delete_selected_title">Delete</string>
+    <string name="btn_reverse_select_title">Reverse Select</string>
+    <string name="btn_select_all_title">Select All</string>
+    <string name="menu_cancel">Cancel</string>
+    <string name="menu_edit">Edit</string>
+    <string name="menu_ok">Ok</string>
 </resources>

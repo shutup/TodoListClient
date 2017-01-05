@@ -34,6 +34,8 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
+import io.realm.RealmList;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 
 public class MainActivity extends BaseActivity implements Constants {
@@ -66,7 +68,7 @@ public class MainActivity extends BaseActivity implements Constants {
     private List<MenuItem> mMenuItems;
     private DrawerMenuAdapter mDrawerMenuAdapter;
     private TodoListAdapter mTodoListAdapter;
-    private List<Todo> mTodos;
+    private RealmList<Todo> mTodos;
     private Realm mRealm;
     private static int currentType = ACTIVITY_NORMAL;
 
@@ -136,7 +138,7 @@ public class MainActivity extends BaseActivity implements Constants {
     }
 
     private void initRecyclerView() {
-        mTodos = new ArrayList<>();
+        mTodos = new RealmList<>();
         mTodoListAdapter = new TodoListAdapter(this, mTodos);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mTodoListAdapter);
@@ -219,12 +221,35 @@ public class MainActivity extends BaseActivity implements Constants {
 
     private void deleteSelected() {
         ArrayList<Todo> selectedList = new ArrayList<>();
+        RealmQuery<Todo> query = mRealm.where(Todo.class);
+
         for (Todo n : mTodoListAdapter.getTodos()) {
             if (n.isChecked()) {
                 selectedList.add(n);
             }
         }
-        mTodoListAdapter.getTodos().removeAll(selectedList);
+        for (int i = 0; i < selectedList.size(); i++) {
+            if (i+1==selectedList.size()) {
+                query.equalTo("id",selectedList.get(i).getId());
+            }else {
+                query.equalTo("id",selectedList.get(i).getId());
+                query.or();
+            }
+        }
+        final RealmResults<Todo> todos = query.findAll();
+        todos.addChangeListener(new RealmChangeListener<RealmResults<Todo>>() {
+            @Override
+            public void onChange(RealmResults<Todo> element) {
+                final RealmResults<Todo> data = element;
+
+            }
+        });
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                todos.deleteAllFromRealm();
+            }
+        });
         mTodoListAdapter.notifyDataSetChanged();
     }
 
