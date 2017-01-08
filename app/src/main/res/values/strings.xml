@@ -15,4 +15,7 @@
     <string name="btn_delete_selected_title">删除</string>
     <string name="btn_reverse_select_title">反选</string>
     <string name="menu_ok">确认</string>
+    <string name="insert_todo_str">添加</string>
+    <string name="update_todo_str">修改</string>
+    <string name="menu_save">保存</string>
 </resources>

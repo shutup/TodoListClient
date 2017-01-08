@@ -6,10 +6,10 @@ package com.shutup.todo.common;
 
 public interface Constants {
     String BASE_URL = "http://shutups.lan:8080";
-//    String BASE_URL = "http://192.168.188.84:8080";
     String USER_NAME = "USER_NAME";
     String USER_TOKEN = "USER_TOKEN";
 
+    String ACTIVITY_STATUS = "ACTIVITY_STATUS";
     int ACTIVITY_NORMAL = 1;
     int ACTIVITY_EDIT = 2;
 

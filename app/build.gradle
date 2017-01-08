@@ -40,4 +40,5 @@ dependencies {
     compile 'com.android.support:design:25.0.0'
     compile 'org.mapstruct:mapstruct:1.1.0.Final'
     apt 'org.mapstruct:mapstruct-processor:1.1.0.Final'
+    compile 'org.greenrobot:eventbus:3.0.0'
 }

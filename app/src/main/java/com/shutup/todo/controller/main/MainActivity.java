@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,11 +21,15 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.shutup.todo.BuildConfig;
 import com.shutup.todo.R;
 import com.shutup.todo.common.Constants;
+import com.shutup.todo.common.RecyclerTouchListener;
 import com.shutup.todo.controller.base.BaseActivity;
 import com.shutup.todo.model.normal_use.MenuItem;
 import com.shutup.todo.model.persist.Todo;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,8 +90,8 @@ public class MainActivity extends BaseActivity implements Constants {
         initDrawerLayout();
         initDrawerMenu();
 
-        initRecyclerView();
         initRealm();
+        initRecyclerView();
         loadLocalData();
     }
 
@@ -142,6 +147,22 @@ public class MainActivity extends BaseActivity implements Constants {
         mTodoListAdapter = new TodoListAdapter(this, mTodos);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mTodoListAdapter);
+        mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), mRecyclerView, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                if (currentType == ACTIVITY_NORMAL) {
+                    EventBus.getDefault().postSticky(mTodos.get(position));
+                    Intent intent = new Intent(MainActivity.this, AddTodoActivity.class);
+                    intent.putExtra(ACTIVITY_STATUS,ACTIVITY_EDIT);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
 //        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
     }
 
@@ -154,6 +175,7 @@ public class MainActivity extends BaseActivity implements Constants {
         todos.addChangeListener(new RealmChangeListener<RealmResults<Todo>>() {
             @Override
             public void onChange(RealmResults<Todo> elements) {
+                if (BuildConfig.DEBUG) Log.d("MainActivity", "clear");
                 mTodos.clear();
                 mTodos.addAll(elements);
                 mTodoListAdapter.setTodos(mTodos);
@@ -201,9 +223,7 @@ public class MainActivity extends BaseActivity implements Constants {
                 mTodoListAdapter.setType(ACTIVITY_NORMAL);
                 mTodoListAdapter.notifyDataSetChanged();
             }
-
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -226,7 +246,11 @@ public class MainActivity extends BaseActivity implements Constants {
         for (Todo n : mTodoListAdapter.getTodos()) {
             if (n.isChecked()) {
                 selectedList.add(n);
+                if (BuildConfig.DEBUG) Log.d("MainActivity", "checked");
             }
+        }
+        if (selectedList.size()==0) {
+            return;
         }
         for (int i = 0; i < selectedList.size(); i++) {
             if (i+1==selectedList.size()) {
@@ -237,20 +261,16 @@ public class MainActivity extends BaseActivity implements Constants {
             }
         }
         final RealmResults<Todo> todos = query.findAll();
-        todos.addChangeListener(new RealmChangeListener<RealmResults<Todo>>() {
-            @Override
-            public void onChange(RealmResults<Todo> element) {
-                final RealmResults<Todo> data = element;
+        if (BuildConfig.DEBUG) Log.d("MainActivity", "todos.size():" + todos.size());
 
-            }
-        });
         mRealm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
+                if (BuildConfig.DEBUG) Log.d("MainActivity", "todos.size():" + todos.size());
                 todos.deleteAllFromRealm();
+                mTodoListAdapter.notifyDataSetChanged();
             }
         });
-        mTodoListAdapter.notifyDataSetChanged();
     }
 
     private void selectAll(Button btn) {
