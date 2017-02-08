@@ -143,8 +143,8 @@ public class LoginActivity extends BaseActivity {
         switch (view.getId()) {
             case R.id.loginBtn:
                 //just for test
-                intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
+//                intent = new Intent(LoginActivity.this, MainActivity.class);
+//                startActivity(intent);
                 if (checkUserPhone()&& checkPassword()) {
                     Call<ResponseBody> call= mTodoListApi.loginUser(new LoginUserRequest(mUserPhone.getEditableText().toString(),mPassword.getEditableText().toString()));
                     call.enqueue(new Callback<ResponseBody>() {

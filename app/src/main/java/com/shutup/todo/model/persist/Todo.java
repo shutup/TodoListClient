@@ -22,6 +22,8 @@ public class Todo extends RealmObject {
     private boolean isDelete = false;
     @Ignore
     private boolean isChecked= false;
+    private boolean isSynced = false;
+    private boolean isCreated = false;
 
     public Todo(){
 
@@ -92,5 +94,21 @@ public class Todo extends RealmObject {
 
     public void setChecked(boolean checked) {
         isChecked = checked;
+    }
+
+    public boolean isSynced() {
+        return isSynced;
+    }
+
+    public void setSynced(boolean synced) {
+        isSynced = synced;
+    }
+
+    public boolean isCreated() {
+        return isCreated;
+    }
+
+    public void setCreated(boolean created) {
+        isCreated = created;
     }
 }

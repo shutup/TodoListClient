@@ -11,6 +11,9 @@ import com.shutup.todo.R;
 import com.shutup.todo.common.Constants;
 import com.shutup.todo.controller.base.BaseActivity;
 import com.shutup.todo.controller.login.LoginActivity;
+import com.shutup.todo.model.response.LoginUserResponse;
+
+import io.realm.Realm;
 
 public class SplashActivity extends BaseActivity implements Constants{
 
@@ -30,16 +33,20 @@ public class SplashActivity extends BaseActivity implements Constants{
     }
 
     private void judgeLogin() {
-        SharedPreferences sharedPreferences = getSharedPreferences("user_info", MODE_PRIVATE);
-        String user_name = sharedPreferences.getString(USER_NAME,"");
-        String user_token = sharedPreferences.getString(USER_TOKEN,"");
-        if (user_name.equals("")||user_token.equals("")) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
-        }else {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        }
-        finish();
+        Realm realm = Realm.getDefaultInstance();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                LoginUserResponse loginUserResponse = realm.where(LoginUserResponse.class).findFirst();
+                if (loginUserResponse==null||loginUserResponse.isEmpty()) {
+                    Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                } else {
+                    Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
+                finish();
+            }
+        });
     }
 }
