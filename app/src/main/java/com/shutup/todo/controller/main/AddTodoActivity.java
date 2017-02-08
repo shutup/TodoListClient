@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +20,7 @@ import com.shutup.todo.common.Constants;
 import com.shutup.todo.common.RetrofitSingleton;
 import com.shutup.todo.common.TodoListApi;
 import com.shutup.todo.controller.base.BaseActivity;
+import com.shutup.todo.controller.sync.MyIntentService;
 import com.shutup.todo.model.persist.Todo;
 
 import org.greenrobot.eventbus.EventBus;
@@ -41,6 +44,7 @@ public class AddTodoActivity extends BaseActivity implements Constants{
     FloatingActionButton mAddTodoFAB;
     private int currentType = ACTIVITY_NORMAL;
     private Todo mTodo;
+    private boolean isChanged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,23 @@ public class AddTodoActivity extends BaseActivity implements Constants{
     public void onStop() {
         EventBus.getDefault().unregister(this);
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent(AddTodoActivity.this, MyIntentService.class);
+        if (mTodo == null||!isChanged) {
+            return;
+        }
+        if (currentType == ACTIVITY_NORMAL) {
+            intent.setAction(MyIntentService.ACTION_CREATE);
+            intent.putExtra(MyIntentService.EXTRA_PARAM1,mTodo.getId()+"");
+        }else if (currentType == ACTIVITY_EDIT) {
+            intent.setAction(MyIntentService.ACTION_SYNC);
+            intent.putExtra(MyIntentService.EXTRA_PARAM1,mTodo.getId()+"");
+        }
+        startService(intent);
     }
 
     private void initType() {
@@ -94,6 +115,7 @@ public class AddTodoActivity extends BaseActivity implements Constants{
     public boolean onOptionsItemSelected(MenuItem item) {
         // handle arrow click here
         if (item.getItemId() == android.R.id.home) {
+            isChanged = false;
             finish(); // close this activity and return to preview activity (if there is any)
         }else if (item.getItemId() == R.id.menu_ok) {
             saveToLocal();
@@ -104,6 +126,22 @@ public class AddTodoActivity extends BaseActivity implements Constants{
     }
 
     private void initEditor() {
+        mTodoContent.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                isChanged = true;
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     private void initApiInstance() {
@@ -145,6 +183,9 @@ public class AddTodoActivity extends BaseActivity implements Constants{
             public void execute(Realm realm) {
                 if (currentType == ACTIVITY_NORMAL) {
                     Todo todo = new Todo(content);
+                    mTodo = todo;
+                    todo.setSynced(false);
+                    todo.setCreated(false);
                     Number currentIdNum = realm.where(Todo.class).max("id");
                     long nextId;
                     if(currentIdNum == null) {
@@ -155,8 +196,11 @@ public class AddTodoActivity extends BaseActivity implements Constants{
                     todo.setId(nextId);
                     realm.insertOrUpdate(todo);
                 }else if (currentType == ACTIVITY_EDIT){
-                    mTodo.setTodo(content);
-                    realm.insertOrUpdate(mTodo);
+                    if (isChanged) {
+                        mTodo.setTodo(content);
+                        mTodo.setSynced(false);
+                        realm.insertOrUpdate(mTodo);
+                    }
                 }
             }
         });
