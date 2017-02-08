@@ -35,4 +35,8 @@ public class LoginUserResponse extends RealmObject{
     public void setToken(String token) {
         this.token = token;
     }
+
+    public boolean isEmpty(){
+        return token.contentEquals("");
+    }
 }

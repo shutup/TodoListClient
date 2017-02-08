@@ -8,8 +8,6 @@ import java.util.Date;
 
 public class AddTodoResponse{
     private Long  id;
-    private Date createdAt;
-    private Date updatedAt;
     private String todo;
     private boolean isFinish;
     private boolean isDelete;
@@ -23,22 +21,6 @@ public class AddTodoResponse{
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public String getTodo() {

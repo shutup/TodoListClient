@@ -3,6 +3,7 @@
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:name=".common.TodoListApplication"
         android:allowBackup="true"
@@ -25,6 +26,11 @@
         </activity>
         <activity android:name=".controller.login.RegisterActivity">
         </activity>
+
+        <service
+            android:name=".controller.sync.MyIntentService"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>
