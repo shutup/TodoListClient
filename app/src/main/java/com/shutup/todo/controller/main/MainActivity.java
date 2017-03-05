@@ -26,6 +26,7 @@ import com.shutup.todo.R;
 import com.shutup.todo.common.Constants;
 import com.shutup.todo.common.RecyclerTouchListener;
 import com.shutup.todo.controller.base.BaseActivity;
+import com.shutup.todo.controller.sync.MyIntentService;
 import com.shutup.todo.model.normal_use.MenuItem;
 import com.shutup.todo.model.persist.Todo;
 
@@ -92,7 +93,29 @@ public class MainActivity extends BaseActivity implements Constants {
 
         initRealm();
         initRecyclerView();
+        syncServerData();
         loadLocalData();
+        syncLocalData();
+    }
+
+    private void syncServerData() {
+        Intent intent = new Intent(MainActivity.this, MyIntentService.class);
+        intent.setAction(MyIntentService.ACTION_FETCH_ALL);
+        startService(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        syncLocalData();
+        super.onDestroy();
+    }
+
+    private void syncLocalData() {
+        Intent intent = new Intent(MainActivity.this, MyIntentService.class);
+        intent.setAction(MyIntentService.ACTION_CREATE_ALL);
+        startService(intent);
+        intent.setAction(MyIntentService.ACTION_SYNC_ALL);
+        startService(intent);
     }
 
     private void initToolBar() {

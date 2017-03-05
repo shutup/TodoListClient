@@ -18,12 +18,12 @@ public class Todo extends RealmObject {
     private Date createdAt = new Date();
     private Date updatedAt = new Date();
     private String todo;
-    private boolean isFinish = false;
-    private boolean isDelete = false;
+    private boolean isFinish ;
+    private boolean isDelete ;
     @Ignore
-    private boolean isChecked= false;
-    private boolean isSynced = false;
-    private boolean isCreated = false;
+    private boolean isChecked;
+    private boolean isSynced ;
+    private boolean isCreated ;
 
     public Todo(){
 

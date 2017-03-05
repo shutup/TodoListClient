@@ -18,6 +18,7 @@ import com.shutup.todo.common.Constants;
 import com.shutup.todo.common.RetrofitSingleton;
 import com.shutup.todo.common.TodoListApi;
 import com.shutup.todo.controller.base.BaseActivity;
+import com.shutup.todo.controller.sync.MyIntentService;
 import com.shutup.todo.model.request.RegisterUserRequest;
 import com.shutup.todo.model.response.RestInfo;
 
@@ -94,6 +95,7 @@ public class RegisterActivity extends BaseActivity implements Constants {
                         if (BuildConfig.DEBUG)
                             Log.d("RegisterActivity", "t.getCause():" + t);
 
+                        Toast.makeText(RegisterActivity.this, "注册用户失败，稍后尝试！", Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
