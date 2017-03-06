@@ -18,4 +18,7 @@
     <string name="insert_todo_str">添加</string>
     <string name="update_todo_str">修改</string>
     <string name="menu_save">保存</string>
+    <string name="settingStr">设置</string>
+    <string name="logoutStr">退出</string>
+    <string name="userStr">账户</string>
 </resources>

@@ -1,7 +1,5 @@
 package com.shutup.todo.model.response;
 
-import java.util.Date;
-
 /**
  * Created by shutup on 2016/12/18.
  */

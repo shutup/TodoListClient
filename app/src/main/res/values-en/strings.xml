@@ -19,4 +19,7 @@
     <string name="insert_todo_str">Insert</string>
     <string name="menu_save">Save</string>
     <string name="update_todo_str">Update</string>
+    <string name="settingStr">Setting</string>
+    <string name="logoutStr">Logout</string>
+    <string name="userStr">Profile</string>
 </resources>

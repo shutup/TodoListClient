@@ -241,6 +241,9 @@ public class MyIntentService extends IntentService {
         call.enqueue(new Callback<RemoteTodoResponse>() {
             @Override
             public void onResponse(Call<RemoteTodoResponse> call, Response<RemoteTodoResponse> response) {
+                if (!response.isSuccessful()) {
+                    return;
+                }
                 RemoteTodoResponse remoteTodoResponse = response.body();
                 int pages = remoteTodoResponse.getTotalPages();
                 int size = remoteTodoResponse.getSize();

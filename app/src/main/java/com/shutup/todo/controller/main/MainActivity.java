@@ -152,15 +152,14 @@ public class MainActivity extends BaseActivity implements Constants {
 
     private void initDrawerMenu() {
         mMenuItems = new ArrayList<>();
-        mMenuItems.add(new MenuItem("全部"));
-        mMenuItems.add(new MenuItem("已完成"));
-        mMenuItems.add(new MenuItem("未完成"));
+        mMenuItems.add(new MenuItem("账户",new Intent(this,UserActivity.class)));
+        mMenuItems.add(new MenuItem("设置",new Intent(this,SettingActivity.class)));
         mDrawerMenuAdapter = new DrawerMenuAdapter(this, mMenuItems);
         mDrawerMenuList.setAdapter(mDrawerMenuAdapter);
         mDrawerMenuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+                startActivity(mMenuItems.get(i).getIntent());
             }
         });
     }

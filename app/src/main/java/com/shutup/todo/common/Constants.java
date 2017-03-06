@@ -6,7 +6,7 @@ package com.shutup.todo.common;
 
 public interface Constants {
 //    String BASE_URL = "http://shutups.lan:8080";
-    String BASE_URL = "http://todo.fleetinglife.cn";
+    String BASE_URL = "https://todo.fleetinglife.cn";
 
     String ACTIVITY_STATUS = "ACTIVITY_STATUS";
     int ACTIVITY_NORMAL = 1;
