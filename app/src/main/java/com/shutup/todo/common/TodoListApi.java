@@ -10,6 +10,7 @@ import com.shutup.todo.model.response.RestInfo;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
@@ -59,4 +60,7 @@ public interface TodoListApi {
 
     @GET("/todo/list")
     Call<RemoteTodoResponse> fetchTodoList(@Header("token") String token, @Query("page") Integer page);
+
+    @DELETE("/todo/{tid}")
+    Call<ResponseBody> deleteTodo(@Header("token") String token, @Path("tid") Long tid);
 }

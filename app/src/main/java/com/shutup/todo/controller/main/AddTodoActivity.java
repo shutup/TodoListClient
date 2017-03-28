@@ -2,6 +2,7 @@ package com.shutup.todo.controller.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -195,15 +196,23 @@ public class AddTodoActivity extends BaseActivity implements Constants{
                     }
                     todo.setId(nextId);
                     realm.insertOrUpdate(todo);
+                    refreshUI();
                 }else if (currentType == ACTIVITY_EDIT){
                     if (isChanged) {
                         mTodo.setTodo(content);
                         mTodo.setSynced(false);
                         realm.insertOrUpdate(mTodo);
+                        refreshUI();
                     }
                 }
             }
         });
+    }
+
+    private void refreshUI() {
+        Message m = new Message();
+        m.what = 1;
+        EventBus.getDefault().postSticky(m);
     }
 
     private boolean checkContentNotEmpty() {

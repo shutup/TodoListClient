@@ -1,7 +1,11 @@
 package com.shutup.todo.controller.main;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
@@ -31,6 +35,8 @@ import com.shutup.todo.model.normal_use.MenuItem;
 import com.shutup.todo.model.persist.Todo;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,10 +104,18 @@ public class MainActivity extends BaseActivity implements Constants {
         syncLocalData();
     }
 
-    private void syncServerData() {
-        Intent intent = new Intent(MainActivity.this, MyIntentService.class);
-        intent.setAction(MyIntentService.ACTION_FETCH_ALL);
-        startService(intent);
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+        if (BuildConfig.DEBUG) Log.d("MainActivity", "onStart");
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+        if (BuildConfig.DEBUG) Log.d("MainActivity", "onStop");
     }
 
     @Override
@@ -110,8 +124,16 @@ public class MainActivity extends BaseActivity implements Constants {
         super.onDestroy();
     }
 
+    private void syncServerData() {
+        Intent intent = new Intent(MainActivity.this, MyIntentService.class);
+        intent.setAction(MyIntentService.ACTION_FETCH_ALL);
+        startService(intent);
+    }
+
     private void syncLocalData() {
         Intent intent = new Intent(MainActivity.this, MyIntentService.class);
+        intent.setAction(MyIntentService.ACTION_DELETE_ALL);
+        startService(intent);
         intent.setAction(MyIntentService.ACTION_CREATE_ALL);
         startService(intent);
         intent.setAction(MyIntentService.ACTION_SYNC_ALL);
@@ -193,7 +215,7 @@ public class MainActivity extends BaseActivity implements Constants {
     }
 
     private void loadLocalData() {
-        RealmResults<Todo> todos = mRealm.where(Todo.class).findAllSortedAsync("createdAt");
+        RealmResults<Todo> todos = mRealm.where(Todo.class).equalTo("isDelete",false).findAllSortedAsync("createdAt");
         todos.addChangeListener(new RealmChangeListener<RealmResults<Todo>>() {
             @Override
             public void onChange(RealmResults<Todo> elements) {
@@ -275,24 +297,74 @@ public class MainActivity extends BaseActivity implements Constants {
             return;
         }
         for (int i = 0; i < selectedList.size(); i++) {
-            if (i+1==selectedList.size()) {
-                query.equalTo("id",selectedList.get(i).getId());
+            Todo todo = selectedList.get(i);
+            query = mRealm.where(Todo.class);
+            query.equalTo("id",selectedList.get(i).getId());
+            if (hasNet()) {
+                //有网
+                if (todo.isCreated()) {
+                    //已同步
+                    Intent intent = new Intent(MainActivity.this,MyIntentService.class);
+                    intent.setAction(MyIntentService.ACTION_DELETE);
+                    intent.putExtra(MyIntentService.EXTRA_PARAM1,selectedList.get(i).getSid());
+                    startService(intent);
+                }else {
+                    //未同步
+                    final RealmResults<Todo> todos = query.findAll();
+                    if (BuildConfig.DEBUG) Log.d("MainActivity", "del un sync todo size:" + todos.size());
+
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            todos.deleteAllFromRealm();
+                            mTodoListAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
             }else {
-                query.equalTo("id",selectedList.get(i).getId());
-                query.or();
+                //无网
+                if (todo.isCreated()) {
+                    //已同步
+//                    mark as delete
+                    final RealmResults<Todo> todos = query.findAll();
+                    if (BuildConfig.DEBUG) Log.d("MainActivity", "todos.size():" + todos.size());
+                    for (final Todo t:todos
+                         ) {
+                        mRealm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                if (BuildConfig.DEBUG) Log.d("MainActivity", "delete:" + t.getId());
+                                t.setDelete(true);
+                                realm.insertOrUpdate(t);
+                            }
+                        });
+                    }
+                }else {
+                    final RealmResults<Todo> todos = query.findAll();
+                    if (BuildConfig.DEBUG) Log.d("MainActivity", "todos.size():" + todos.size());
+
+                    mRealm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            if (BuildConfig.DEBUG) Log.d("MainActivity", "todos.size():" + todos.size());
+                            todos.deleteAllFromRealm();
+                            mTodoListAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
             }
         }
-        final RealmResults<Todo> todos = query.findAll();
-        if (BuildConfig.DEBUG) Log.d("MainActivity", "todos.size():" + todos.size());
+    }
 
-        mRealm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                if (BuildConfig.DEBUG) Log.d("MainActivity", "todos.size():" + todos.size());
-                todos.deleteAllFromRealm();
-                mTodoListAdapter.notifyDataSetChanged();
-            }
-        });
+    private boolean hasNet() {
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
     }
 
     private void selectAll(Button btn) {
@@ -308,5 +380,12 @@ public class MainActivity extends BaseActivity implements Constants {
             btn.setText(R.string.btn_select_all_title);
         }
         mTodoListAdapter.notifyDataSetChanged();
+    }
+
+    @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
+    public void onActionRecv(Message msg) {
+        if (msg.what==1) {
+            mTodoListAdapter.notifyDataSetChanged();
+        }
     }
 }

@@ -14,8 +14,6 @@ import com.shutup.todo.common.Constants;
 import com.shutup.todo.common.DateUtils;
 import com.shutup.todo.model.persist.Todo;
 
-import java.util.List;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import io.realm.RealmList;
@@ -44,6 +42,9 @@ public class TodoListAdapter extends RecyclerView.Adapter<MyViewHolder> implemen
     public void onBindViewHolder(MyViewHolder holder, int position) {
         final int pos = position;
         Todo todo = mTodos.get(position);
+        if (!todo.isValid()){
+            return;
+        }
         holder.mTodoContent.setText(todo.getTodo());
         holder.mTodoCreateTime.setText(DateUtils.formatDate(todo.getCreatedAt()));
         if (type == ACTIVITY_EDIT) {

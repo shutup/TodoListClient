@@ -15,7 +15,7 @@
     <string name="btn_select_all_title">Select All</string>
     <string name="menu_cancel">Cancel</string>
     <string name="menu_edit">Edit</string>
-    <string name="menu_ok">Ok</string>
+    <string name="menu_ok">OK</string>
     <string name="insert_todo_str">Insert</string>
     <string name="menu_save">Save</string>
     <string name="update_todo_str">Update</string>

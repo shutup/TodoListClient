@@ -1,11 +1,10 @@
 package com.shutup.todo.controller.main;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Bundle;
 
 import com.shutup.todo.R;
 import com.shutup.todo.common.Constants;

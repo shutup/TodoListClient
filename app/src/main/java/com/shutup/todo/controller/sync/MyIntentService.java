@@ -2,6 +2,7 @@ package com.shutup.todo.controller.sync;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -16,6 +17,8 @@ import com.shutup.todo.model.response.AddTodoResponse;
 import com.shutup.todo.model.response.LoginUserResponse;
 import com.shutup.todo.model.response.RemoteTodoResponse;
 import com.shutup.todo.model.response.UpdateTodoResponse;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,6 +44,8 @@ public class MyIntentService extends IntentService {
     public static final String ACTION_CREATE_ALL = "com.shutup.todo.controller.sync.action.CREATE_ALL";
     public static final String ACTION_SYNC_ALL = "com.shutup.todo.controller.sync.action.SYNC_ALL";
     public static final String ACTION_FETCH_ALL = "com.shutup.todo.controller.sync.action.FETCH_ALL";
+    public static final String ACTION_DELETE = "com.shutup.todo.controller.sync.action.DELETE";
+    public static final String ACTION_DELETE_ALL = "com.shutup.todo.controller.sync.action.DELETE_ALL";
 
     public static final String EXTRA_PARAM1 = "com.shutup.todo.controller.sync.extra.PARAM1";
     public static final String EXTRA_PARAM2 = "com.shutup.todo.controller.sync.extra.PARAM2";
@@ -68,6 +73,13 @@ public class MyIntentService extends IntentService {
                 handleActionSyncAll();
             }else if (ACTION_FETCH_ALL.equals(action)) {
                 handleActionFetchAll(0);
+            }else if (ACTION_DELETE.equals(action)) {
+                final Long sid = intent.getLongExtra(EXTRA_PARAM1,-1);
+                if (sid > 0) {
+                    handleActionDelete(sid);
+                }
+            }else if (ACTION_DELETE_ALL.equals(action)) {
+                handleActionDeleteAll();
             }
         }
     }
@@ -219,6 +231,7 @@ public class MyIntentService extends IntentService {
                                     realm.insertOrUpdate(todo);
                                 }
                             });
+                            refreshUI();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -232,6 +245,12 @@ public class MyIntentService extends IntentService {
                 }
             });
         }
+    }
+
+    private void refreshUI() {
+        Message m = new Message();
+        m.what = 1;
+        EventBus.getDefault().postSticky(m);
     }
 
     private void handleActionFetchAll(Integer page) {
@@ -262,6 +281,9 @@ public class MyIntentService extends IntentService {
                             } else {
                                 nextId = currentIdNum.intValue() + 1;
                             }
+                            if (todo.isDelete()) {
+                                return;
+                            }
                             todo.setId(nextId);
                             realm.insertOrUpdate(todo);
                         }
@@ -278,6 +300,47 @@ public class MyIntentService extends IntentService {
 
             }
         });
+    }
+
+    private void handleActionDelete(final Long sid) {
+        if (BuildConfig.DEBUG) Log.d("MyIntentService Delete ",sid+"");
+        LoginUserResponse loginUserResponse = Realm.getDefaultInstance().where(LoginUserResponse.class).findFirst();
+        Call<ResponseBody> call = mTodoListApi.deleteTodo(loginUserResponse.getToken(), sid);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (!response.isSuccessful()) {
+                    return;
+                }
+
+                Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        RealmResults<Todo> todos = realm.where(Todo.class).equalTo("sid",sid).findAll();
+                        Todo todo = todos.first();
+                        todo.deleteFromRealm();
+                    }
+                });
+                refreshUI();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void handleActionDeleteAll() {
+        if (BuildConfig.DEBUG) Log.d("MyIntentService Delete ","All");
+        LoginUserResponse loginUserResponse = Realm.getDefaultInstance().where(LoginUserResponse.class).findFirst();
+
+        RealmResults<Todo> todos = Realm.getDefaultInstance().where(Todo.class).equalTo("isDelete",true).findAll();
+        for (final Todo todo:todos
+             ) {
+            handleActionDelete(todo.getSid());
+        }
+
     }
 
     private void initApiInstance() {

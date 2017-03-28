@@ -5,8 +5,6 @@ import com.shutup.todo.model.persist.Todo;
 import java.util.Date;
 import java.util.List;
 
-import io.realm.Realm;
-
 /**
  * Created by shutup on 2017/3/5.
  */
@@ -177,6 +175,8 @@ public class RemoteTodoResponse {
             todo.setCreated(true);
             todo.setUpdatedAt(new Date(this.updatedAt));
             todo.setCreatedAt(new Date(this.createdAt));
+            todo.setDelete(this.delete);
+            todo.setFinish(this.finish);
             return todo;
         }
     }

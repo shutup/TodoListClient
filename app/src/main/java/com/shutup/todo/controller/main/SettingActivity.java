@@ -48,10 +48,11 @@ public class SettingActivity extends BaseActivity {
             @Override
             public void execute(Realm realm) {
                 realm.deleteAll();
-                Intent intent = new Intent(SettingActivity.this, LoginActivity.class);
+                Intent intent = new Intent(SettingActivity.this, LoginActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
             }
         });
+
     }
 }
