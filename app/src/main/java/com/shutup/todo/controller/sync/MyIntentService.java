@@ -285,7 +285,10 @@ public class MyIntentService extends IntentService {
                                 return;
                             }
                             todo.setId(nextId);
-                            realm.insertOrUpdate(todo);
+                            Todo existTodo = realm.where(Todo.class).equalTo("sid",todo.getSid()).findFirst();
+                            if (existTodo==null) {
+                                realm.insertOrUpdate(todo);
+                            }
                         }
                     });
                 }

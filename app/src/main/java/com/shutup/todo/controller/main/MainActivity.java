@@ -385,7 +385,7 @@ public class MainActivity extends BaseActivity implements Constants {
     @Subscribe(sticky = true,threadMode = ThreadMode.MAIN)
     public void onActionRecv(Message msg) {
         if (msg.what==1) {
-            mTodoListAdapter.notifyDataSetChanged();
+            loadLocalData();
         }
     }
 }
